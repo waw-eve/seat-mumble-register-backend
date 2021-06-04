@@ -16,8 +16,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
-        logger.info("class:" + msg.getClass().getName());
-        DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
+        logger.info("class:{}", msg.getClass().getName());
+        var response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
                 Unpooled.wrappedBuffer("test".getBytes())); // 2
 
         HttpHeaders heads = response.headers();

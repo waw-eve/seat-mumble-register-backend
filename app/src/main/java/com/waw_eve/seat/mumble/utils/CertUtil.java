@@ -38,19 +38,13 @@ import org.slf4j.LoggerFactory;
 public class CertUtil {
     private static final Logger logger = LoggerFactory.getLogger(CertUtil.class);
 
-    private static final String signatureAlgorithm = "SHA256WithRSA";
+    private static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
 
     private static KeyPairGenerator keyPairGen;
-
-    private static KeyStore caKeyStore;
 
     private static PrivateKey caPrivateKey;
 
     private static String caPassword;
-
-    private static X500Name caDN;
-
-    private static String caSubject;
 
     static {
         // adds the Bouncy castle provider to java security
@@ -63,22 +57,36 @@ public class CertUtil {
         keyPairGen.initialize(4096, new SecureRandom());
     }
 
+    private CertUtil() {
+    }
+
     public static void init(Configuration configuration) {
-        String caFilePath = configuration.getCaFilePath();
-        caSubject = configuration.getCaSubject();
-        caDN = new X500Name(caSubject);
         caPassword = configuration.getCaPassword();
-        File caFile = new File(caFilePath);
+        KeyStore caKeyStore;
+        String caFilePath = configuration.getCaFilePath();
+        var caSubject = configuration.getCaSubject();
+        var caDN = new X500Name(caSubject);
+        var caFile = new File(caFilePath);
         logger.info("Initializing certificate tool");
         try {
             if (!caFile.exists()) {
                 caKeyStore = createCA(caDN);
-                saveToFile(caKeyStore, caFile, caPassword);
+                if (caFile.createNewFile()) {
+                    try (var stream = new FileOutputStream(caFile)) {
+                        saveToFile(caKeyStore, stream, caPassword);
+                    }
+                }
             } else {
-                caKeyStore = loadFromFile(caFile, caPassword);
+                try (var stream = new FileInputStream(caFile)) {
+                    caKeyStore = loadFromFile(stream, caPassword);
+                }
+            }
+            if (caKeyStore == null) {
+                logger.error("Fail to init CA");
+                return;
             }
             caPrivateKey = (PrivateKey) caKeyStore.getKey(caSubject, caPassword.toCharArray());
-        } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException e) {
+        } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | IOException e) {
             logger.error("Error in init CA", e);
         }
         logger.info("The certificate tool is initialized");
@@ -89,25 +97,25 @@ public class CertUtil {
             logger.error("The certificate tool has not been initialized");
             return null;
         }
-        KeyPair keyPair = keyPairGen.genKeyPair();
+        var keyPair = keyPairGen.genKeyPair();
 
         long now = System.currentTimeMillis();
-        Date startDate = new Date(now);
+        var startDate = new Date(now);
 
-        BigInteger certSerialNumber = new BigInteger(Long.toString(now));
+        var certSerialNumber = new BigInteger(Long.toString(now));
 
-        Calendar calendar = Calendar.getInstance();
+        var calendar = Calendar.getInstance();
         calendar.setTime(startDate);
         calendar.add(Calendar.YEAR, 1);
 
-        Date endDate = calendar.getTime();
+        var endDate = calendar.getTime();
 
         try {
 
-            ContentSigner contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).build(caPrivateKey);
+            var contentSigner = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(caPrivateKey);
 
-            JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber,
-                    startDate, endDate, dnName, keyPair.getPublic());
+            var certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate, endDate, dnName,
+                    keyPair.getPublic());
             return packageCert(keyPair,
                     new JcaX509CertificateConverter().getCertificate(certBuilder.build(contentSigner)), "");
         } catch (OperatorCreationException | CertificateException e) {
@@ -117,9 +125,8 @@ public class CertUtil {
     }
 
     private static KeyStore packageCert(KeyPair keyPair, X509Certificate certificate, String password) {
-        KeyStore keyStore;
         try {
-            keyStore = KeyStore.getInstance("PKCS12");
+            var keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(null, null);
             keyStore.setKeyEntry(certificate.getSubjectX500Principal().getName(), keyPair.getPrivate(),
                     password.toCharArray(), new Certificate[] { certificate });
@@ -130,16 +137,10 @@ public class CertUtil {
         }
     }
 
-    private static KeyStore loadFromFile(File certFile, String password) {
-        if (!certFile.exists()) {
-            return null;
-        }
-        FileInputStream stream;
+    private static KeyStore loadFromFile(FileInputStream stream, String password) {
         try {
-            stream = new FileInputStream(certFile);
-            KeyStore keyStore = KeyStore.getInstance("PKCS12");
+            var keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(stream, password.toCharArray());
-            stream.close();
             return keyStore;
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
             logger.error("Cannot load KeyStore from file", e);
@@ -147,12 +148,9 @@ public class CertUtil {
         }
     }
 
-    private static void saveToFile(KeyStore keyStore, File certFile, String password) {
+    private static void saveToFile(KeyStore keyStore, FileOutputStream stream, String password) {
         try {
-            certFile.createNewFile();
-            FileOutputStream stream = new FileOutputStream(certFile);
             keyStore.store(stream, password.toCharArray());
-            stream.close();
         } catch (IOException | KeyStoreException | NoSuchAlgorithmException | CertificateException e) {
             logger.error("Cannot save KeyStore to file", e);
         }
@@ -160,34 +158,34 @@ public class CertUtil {
 
     private static KeyStore createCA(X500Name dnName) {
 
-        KeyPair keyPair = keyPairGen.genKeyPair();
+        var keyPair = keyPairGen.genKeyPair();
 
         long now = System.currentTimeMillis();
-        Date startDate = new Date(now);
+        var startDate = new Date(now);
 
-        BigInteger certSerialNumber = new BigInteger(Long.toString(now));
+        var certSerialNumber = new BigInteger(Long.toString(now));
 
-        Calendar calendar = Calendar.getInstance();
+        var calendar = Calendar.getInstance();
         calendar.setTime(startDate);
         calendar.add(Calendar.YEAR, 99);
 
-        Date endDate = calendar.getTime();
+        var endDate = calendar.getTime();
 
         ContentSigner contentSigner;
         try {
-            contentSigner = new JcaContentSignerBuilder(signatureAlgorithm).build(keyPair.getPrivate());
+            contentSigner = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(keyPair.getPrivate());
         } catch (OperatorCreationException e) {
             logger.error("Cannot init content signer", e);
             return null;
         }
 
-        JcaX509v3CertificateBuilder certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate,
-                endDate, dnName, keyPair.getPublic());
+        var certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate, endDate, dnName,
+                keyPair.getPublic());
 
         // Extensions --------------------------
 
         // Basic Constraints
-        BasicConstraints basicConstraints = new BasicConstraints(true); // <-- true for CA, false for EndEntity
+        var basicConstraints = new BasicConstraints(true); // <-- true for CA, false for EndEntity
         try {
             certBuilder.addExtension(new ASN1ObjectIdentifier("2.5.29.19"), true, basicConstraints);
         } catch (CertIOException e) {

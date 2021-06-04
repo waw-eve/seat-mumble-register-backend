@@ -9,7 +9,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.waw_eve.seat.mumble.http.*;
@@ -22,13 +21,13 @@ public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
-        String configPath = "config.json";
-        File configFile = new File(configPath);
-        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
-        Configuration configuration = new Configuration();
+        var configPath = "config.json";
+        var configFile = new File(configPath);
+        var gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        var configuration = new Configuration();
         if (configFile.exists()) {
             try {
-                JsonReader reader = new JsonReader(new FileReader(configFile));
+                var reader = new JsonReader(new FileReader(configFile));
                 configuration = gson.fromJson(reader, Configuration.class);
             } catch (FileNotFoundException e) {
                 logger.error("Failed to read config file.", e);
@@ -36,20 +35,22 @@ public class App {
         } else {
             logger.warn("Config file is not exist, load default config.");
             try {
-                configFile.createNewFile();
-                FileWriter writer = new FileWriter(configFile);
-                writer.write(gson.toJson(configuration));
-                writer.close();
+                if (configFile.createNewFile()) {
+                    try (var writer = new FileWriter(configFile)) {
+                        writer.write(gson.toJson(configuration));
+                    }
+                }
             } catch (IOException e) {
                 logger.error("Failed to save config.", e);
             }
         }
         CertUtil.init(configuration);
-        HttpServer server = new HttpServer(80);
+        var server = new HttpServer(80);
         try {
             server.start();
-        } catch (Exception e) {
+        } catch (InterruptedException e) {
             logger.error("Failed to start server.", e);
+            Thread.currentThread().interrupt();
         }
     }
 }

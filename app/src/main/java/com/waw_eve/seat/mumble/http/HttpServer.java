@@ -22,13 +22,13 @@ public class HttpServer {
         this.port = port;
     }
 
-    public void start() throws Exception {
-        ServerBootstrap b = new ServerBootstrap();
-        NioEventLoopGroup group = new NioEventLoopGroup();
+    public void start() throws InterruptedException {
+        var b = new ServerBootstrap();
+        var group = new NioEventLoopGroup();
         b.group(group).channel(NioServerSocketChannel.class).childHandler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) throws Exception {
-                logger.info("initChannel ch:" + ch);
+                logger.info("initChannel ch:{}", ch);
                 ch.pipeline().addLast("decoder", new HttpRequestDecoder()) // 1
                         .addLast("encoder", new HttpResponseEncoder()) // 2
                         .addLast("aggregator", new HttpObjectAggregator(512 * 1024)) // 3
