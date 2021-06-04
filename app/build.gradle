@@ -13,6 +13,7 @@ plugins {
     // This plugin is not yet compatible with Gradle7
 //    id 'com.zeroc.gradle.ice-builder.slice' version '1.4.7'
     id 'com.google.cloud.tools.jib' version '3.0.0'
+    id "io.freefair.lombok" version "6.0.0-m2"
 }
 
 repositories {
@@ -28,6 +29,12 @@ dependencies {
     // This dependency is used by the application.
     implementation 'com.google.guava:guava:30.0-jre'
 
+    implementation 'org.projectlombok:lombok:1.18.20'
+    annotationProcessor 'org.projectlombok:lombok:1.18.20'
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-simple
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.30'
+
     implementation 'com.zeroc:ice:3.7.5'
 
     // https://mvnrepository.com/artifact/com.google.code.gson/gson
@@ -38,11 +45,24 @@ dependencies {
 
     // https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on
     implementation group: 'org.bouncycastle', name: 'bcprov-jdk15on', version: '1.68'
+    // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on
+    implementation group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.68'
 
 }
 
-configurations {
-    jib.to.image = 'alliancewaw/seat-mumble-register'
+jib {
+    from {
+        image = 'adoptopenjdk:11-jre'
+    }
+    to {
+        image = 'alliancewaw/seat-mumble-register'
+    }
+    container {
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+        ports = ['80']
+        workingDirectory = '/app/data'
+        volumes = ['/app/data']
+    }
 }
 
 application {
@@ -52,4 +72,8 @@ application {
 
 task buildIce(type: Exec) {
     commandLine 'slice2java', '--output-dir', 'src/main/java', 'src/main/slice/Murmur.ice'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
 }

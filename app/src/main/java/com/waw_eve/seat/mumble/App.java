@@ -3,12 +3,53 @@
  */
 package com.waw_eve.seat.mumble;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.stream.JsonReader;
+import com.waw_eve.seat.mumble.http.*;
+import com.waw_eve.seat.mumble.utils.CertUtil;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class App {
-    public String getGreeting() {
-        return "Hello World!";
-    }
+    private static final Logger logger = LoggerFactory.getLogger(App.class);
 
     public static void main(String[] args) {
-        System.out.println(new App().getGreeting());
+        String configPath = "config.json";
+        File configFile = new File(configPath);
+        Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+        Configuration configuration = new Configuration();
+        if (configFile.exists()) {
+            try {
+                JsonReader reader = new JsonReader(new FileReader(configFile));
+                configuration = gson.fromJson(reader, Configuration.class);
+            } catch (FileNotFoundException e) {
+                logger.error("Failed to read config file.", e);
+            }
+        } else {
+            logger.warn("Config file is not exist, load default config.");
+            try {
+                configFile.createNewFile();
+                FileWriter writer = new FileWriter(configFile);
+                writer.write(gson.toJson(configuration));
+                writer.close();
+            } catch (IOException e) {
+                logger.error("Failed to save config.", e);
+            }
+        }
+        CertUtil.init(configuration);
+        HttpServer server = new HttpServer(80);
+        try {
+            server.start();
+        } catch (Exception e) {
+            logger.error("Failed to start server.", e);
+        }
     }
 }
