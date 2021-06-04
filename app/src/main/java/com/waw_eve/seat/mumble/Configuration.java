@@ -17,9 +17,9 @@ public class Configuration {
     private String caFilePath = "ca.p12";
 
     /**
-     * RSA encrypt key use to encrypt http request data
+     * AES encrypt key use to encrypt http request data
      */
-    private String rsaEncryptKey = "changeme";
+    private String aesEncryptKey = "changeme";
 
     /**
      * If ca file not exist, use this name as CA's CN
