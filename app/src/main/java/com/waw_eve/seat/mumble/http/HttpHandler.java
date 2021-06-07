@@ -37,9 +37,8 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        logger.info("exceptionCaught");
         if (null != cause)
-            cause.printStackTrace();
+            logger.error("Caught exception", cause);
         if (null != ctx)
             ctx.close();
     }

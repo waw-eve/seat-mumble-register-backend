@@ -39,6 +39,7 @@ public class CertUtil {
     private static final Logger logger = LoggerFactory.getLogger(CertUtil.class);
 
     private static final String SIGNATURE_ALGORITHM = "SHA256WithRSA";
+    private static final String CA_FRIENDLY_NAME = "CA";
 
     private static KeyPairGenerator keyPairGen;
 
@@ -64,8 +65,7 @@ public class CertUtil {
         caPassword = configuration.getCaPassword();
         KeyStore caKeyStore;
         String caFilePath = configuration.getCaFilePath();
-        var caSubject = configuration.getCaSubject();
-        var caDN = new X500Name(caSubject);
+        var caDN = new X500Name(configuration.getCaSubject());
         var caFile = new File(caFilePath);
         logger.info("Initializing certificate tool");
         try {
@@ -85,18 +85,25 @@ public class CertUtil {
                 logger.error("Fail to init CA");
                 return;
             }
-            caPrivateKey = (PrivateKey) caKeyStore.getKey(caSubject, caPassword.toCharArray());
+            caPrivateKey = (PrivateKey) caKeyStore.getKey(CA_FRIENDLY_NAME, caPassword.toCharArray());
+            if (caPrivateKey == null) {
+                logger.error("The certificate tool has not been initialized");
+                return;
+            }
         } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | IOException e) {
             logger.error("Error in init CA", e);
         }
         logger.info("The certificate tool is initialized");
     }
 
-    public static KeyStore signCert(X500Name dnName) {
+    public static KeyStore signCert(String name, String email, String org, String password) {
         if (caPrivateKey == null) {
             logger.error("The certificate tool has not been initialized");
             return null;
         }
+        var dnStr = new StringBuilder();
+        dnStr.append("CN=").append(name).append(", E=").append(email).append(", O=").append(org);
+        var dnName = new X500Name(dnStr.toString());
         var keyPair = keyPairGen.genKeyPair();
 
         long now = System.currentTimeMillis();
@@ -117,19 +124,20 @@ public class CertUtil {
             var certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate, endDate, dnName,
                     keyPair.getPublic());
             return packageCert(keyPair,
-                    new JcaX509CertificateConverter().getCertificate(certBuilder.build(contentSigner)), "");
+                    new JcaX509CertificateConverter().getCertificate(certBuilder.build(contentSigner)), name, password);
         } catch (OperatorCreationException | CertificateException e) {
             logger.error("Error in sign new cert.", e);
             return null;
         }
     }
 
-    private static KeyStore packageCert(KeyPair keyPair, X509Certificate certificate, String password) {
+    private static KeyStore packageCert(KeyPair keyPair, X509Certificate certificate, String friendlyName,
+            String password) {
         try {
             var keyStore = KeyStore.getInstance("PKCS12");
             keyStore.load(null, null);
-            keyStore.setKeyEntry(certificate.getSubjectX500Principal().getName(), keyPair.getPrivate(),
-                    password.toCharArray(), new Certificate[] { certificate });
+            keyStore.setKeyEntry(friendlyName, keyPair.getPrivate(), password.toCharArray(),
+                    new Certificate[] { certificate });
             return keyStore;
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
             logger.error("Package certificate to PKCS#12 failed.", e);
@@ -198,7 +206,7 @@ public class CertUtil {
         try {
             X509Certificate certificate = new JcaX509CertificateConverter()
                     .getCertificate(certBuilder.build(contentSigner));
-            return packageCert(keyPair, certificate, caPassword);
+            return packageCert(keyPair, certificate, CA_FRIENDLY_NAME, caPassword);
         } catch (CertificateException e) {
             logger.error("Cannot build certificate", e);
             return null;

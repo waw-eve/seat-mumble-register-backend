@@ -1,5 +1,6 @@
 package com.waw_eve.seat.mumble.utils;
 
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -9,6 +10,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.waw_eve.seat.mumble.Configuration;
@@ -21,26 +23,38 @@ public class AesUtil {
     private static final Logger logger = LoggerFactory.getLogger(AesUtil.class);
 
     private static final String KEY_ALGORITHM = "AES";
-    private static final String DEFAULT_CIPHER_ALGORITHM = "AES/GCM/NoPadding";
+    private static final String DEFAULT_CIPHER_ALGORITHM = "AES/CFB/PKCS5Padding";
+    private static final String IV_STRING = "MUMBLE_AES_IVSTR";
 
-    private static SecretKeySpec aesSecretKey;
+    private static SecretKeySpec keySpec;
+    private static IvParameterSpec ivSpec;
 
     private AesUtil() {
     }
 
     public static void init(Configuration configuration) {
-        aesSecretKey = getSecretKey(configuration.getAesEncryptKey());
+        try {
+            var kg = KeyGenerator.getInstance(KEY_ALGORITHM);
+            var random = SecureRandom.getInstance("SHA1PRNG");
+            random.setSeed(configuration.getAesEncryptKey().getBytes());
+            kg.init(128, random);
+            var secretKey = kg.generateKey();
+            keySpec = new SecretKeySpec(secretKey.getEncoded(), KEY_ALGORITHM);
+            ivSpec = new IvParameterSpec(IV_STRING.getBytes());
+        } catch (NoSuchAlgorithmException ex) {
+            logger.error("", ex);
+        }
     }
 
     public static String encrypt(String content) {
         try {
             var cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
-            cipher.init(Cipher.ENCRYPT_MODE, aesSecretKey);
+            cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
             byte[] result = cipher.doFinal(Base64.decode(content));
 
             return Base64.toBase64String(result);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
-                | BadPaddingException e) {
+                | BadPaddingException | InvalidAlgorithmParameterException e) {
             logger.error("Encrypt message failed", e);
         }
 
@@ -50,29 +64,16 @@ public class AesUtil {
     public static String decrypt(String content) {
         try {
             var cipher = Cipher.getInstance(DEFAULT_CIPHER_ALGORITHM);
-            cipher.init(Cipher.DECRYPT_MODE, aesSecretKey);
+            cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
             byte[] result = cipher.doFinal(Base64.decode(content));
 
             return Base64.toBase64String(result);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
-                | BadPaddingException e) {
+                | BadPaddingException | InvalidAlgorithmParameterException e) {
             logger.error("Decrypt message failed", e);
         }
 
         return null;
     }
 
-    private static SecretKeySpec getSecretKey(String aesEncryptKey) {
-        try {
-            var kg = KeyGenerator.getInstance(KEY_ALGORITHM);
-            var random = SecureRandom.getInstance("SHA1PRNG");
-            random.setSeed(aesEncryptKey.getBytes());
-            kg.init(128, random);
-            var secretKey = kg.generateKey();
-            return new SecretKeySpec(secretKey.getEncoded(), KEY_ALGORITHM);
-        } catch (NoSuchAlgorithmException ex) {
-            logger.error("", ex);
-        }
-        return null;
-    }
 }
