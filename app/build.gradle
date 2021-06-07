@@ -10,6 +10,7 @@ plugins {
     // Apply the application plugin to add support for building a CLI application in Java.
     id 'application'
     id "org.sonarqube" version "3.0"
+    id 'jacoco'
     // This plugin is not yet compatible with Gradle7
 //    id 'com.zeroc.gradle.ice-builder.slice' version '1.4.7'
     id 'com.google.cloud.tools.jib' version '3.0.0'
@@ -76,4 +77,11 @@ task buildIce(type: Exec) {
 
 tasks.withType(JavaCompile) {
     options.encoding = "UTF-8"
+}
+
+test {
+    finalizedBy jacocoTestReport // report is always generated after tests run
+}
+jacocoTestReport {
+    dependsOn test // tests are required to run before generating the report
 }
