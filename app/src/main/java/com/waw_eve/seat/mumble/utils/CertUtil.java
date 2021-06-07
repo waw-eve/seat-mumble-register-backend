@@ -23,8 +23,12 @@ import java.util.Date;
 import com.waw_eve.seat.mumble.Configuration;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.GeneralName;
+import org.bouncycastle.asn1.x509.GeneralNames;
 import org.bouncycastle.cert.CertIOException;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
@@ -43,6 +47,7 @@ public class CertUtil {
 
     private static KeyPairGenerator keyPairGen;
 
+    private static Certificate caCertificate;
     private static PrivateKey caPrivateKey;
 
     private static String caPassword;
@@ -89,6 +94,8 @@ public class CertUtil {
             if (caPrivateKey == null) {
                 logger.error("The certificate tool has not been initialized");
                 return;
+            } else {
+                caCertificate = caKeyStore.getCertificate(CA_FRIENDLY_NAME);
             }
         } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | IOException e) {
             logger.error("Error in init CA", e);
@@ -104,6 +111,8 @@ public class CertUtil {
         var dnStr = new StringBuilder();
         dnStr.append("CN=").append(name).append(", E=").append(email).append(", O=").append(org);
         var dnName = new X500Name(dnStr.toString());
+        var subjectAltNames = GeneralNames
+                .getInstance(new DERSequence(new GeneralName[] { new GeneralName(GeneralName.rfc822Name, email) }));
         var keyPair = keyPairGen.genKeyPair();
 
         long now = System.currentTimeMillis();
@@ -122,10 +131,10 @@ public class CertUtil {
             var contentSigner = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(caPrivateKey);
 
             var certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate, endDate, dnName,
-                    keyPair.getPublic());
+                    keyPair.getPublic()).addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
             return packageCert(keyPair,
                     new JcaX509CertificateConverter().getCertificate(certBuilder.build(contentSigner)), name, password);
-        } catch (OperatorCreationException | CertificateException e) {
+        } catch (OperatorCreationException | CertificateException | CertIOException e) {
             logger.error("Error in sign new cert.", e);
             return null;
         }
@@ -135,9 +144,12 @@ public class CertUtil {
             String password) {
         try {
             var keyStore = KeyStore.getInstance("PKCS12");
+            var certChain = new Certificate[] { certificate };
             keyStore.load(null, null);
-            keyStore.setKeyEntry(friendlyName, keyPair.getPrivate(), password.toCharArray(),
-                    new Certificate[] { certificate });
+            if (caCertificate != null) {
+                keyStore.setCertificateEntry(CA_FRIENDLY_NAME, caCertificate);
+            }
+            keyStore.setKeyEntry(friendlyName, keyPair.getPrivate(), password.toCharArray(), certChain);
             return keyStore;
         } catch (KeyStoreException | NoSuchAlgorithmException | CertificateException | IOException e) {
             logger.error("Package certificate to PKCS#12 failed.", e);

@@ -1,5 +1,14 @@
 package com.waw_eve.seat.mumble.http;
 
+import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.waw_eve.seat.mumble.model.Request;
+import com.waw_eve.seat.mumble.utils.CertUtil;
+
+import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,14 +20,20 @@ import io.netty.util.AsciiString;
 
 public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final Logger logger = LoggerFactory.getLogger(HttpHandler.class);
+    private static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
     private AsciiString contentType = HttpHeaderValues.BASE64;
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
-        logger.info("class:{}", msg.getClass().getName());
+        var req = msg.content().toString(Charset.defaultCharset());
+        var data = gson.fromJson(new String(Base64.decode(req)), Request.class);
+        logger.info("received message:{}", data);
+        var cert = CertUtil.signCert(data.getName(), data.getEmail(), data.getCorp(), "");
+        var stream = new ByteArrayOutputStream();
+        cert.store(stream, "".toCharArray());
         var response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer("test".getBytes())); // 2
+                Unpooled.wrappedBuffer(Base64.encode(stream.toByteArray()))); // 2
 
         HttpHeaders heads = response.headers();
         heads.add(HttpHeaderNames.CONTENT_TYPE, contentType + "; charset=UTF-8");

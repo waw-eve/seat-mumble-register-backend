@@ -25,4 +25,9 @@ public class Configuration {
      * If ca file not exist, use this name as CA's CN
      */
     private String caSubject = "C=CN, O=Test, OU=Root CA, CN=Test Root CA";
+
+    /**
+     * The listening address of the mumble instance to connect to
+     */
+    private String mumbleIceAddr = "127.0.0.1:6502";
 }
