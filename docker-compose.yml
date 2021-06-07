@@ -1,0 +1,11 @@
+version: "3.3"
+
+services:
+  agent:
+    image: alliancewaw/seat-mumble-register
+    restart: unless-stopped
+    network_mode: bridge
+    ports:
+      - 80:80/tcp
+    volumes:
+      - ./data:/app/data
