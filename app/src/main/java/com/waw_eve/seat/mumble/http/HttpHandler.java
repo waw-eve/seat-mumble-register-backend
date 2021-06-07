@@ -5,9 +5,11 @@ import java.nio.charset.Charset;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.waw_eve.seat.mumble.MumbleClient;
 import com.waw_eve.seat.mumble.model.Request;
 import com.waw_eve.seat.mumble.utils.CertUtil;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,12 +17,19 @@ import org.slf4j.LoggerFactory;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
-import io.netty.handler.codec.http.*;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
+import io.netty.handler.codec.http.FullHttpRequest;
+import io.netty.handler.codec.http.HttpHeaderNames;
+import io.netty.handler.codec.http.HttpHeaderValues;
+import io.netty.handler.codec.http.HttpHeaders;
+import io.netty.handler.codec.http.HttpResponseStatus;
+import io.netty.handler.codec.http.HttpVersion;
 import io.netty.util.AsciiString;
 
 public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private static final Logger logger = LoggerFactory.getLogger(HttpHandler.class);
     private static Gson gson = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+    private static MumbleClient mumbleClient = MumbleClient.getInstance();
 
     private AsciiString contentType = HttpHeaderValues.BASE64;
 
@@ -30,6 +39,10 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         var data = gson.fromJson(new String(Base64.decode(req)), Request.class);
         logger.info("received message:{}", data);
         var cert = CertUtil.signCert(data.getName(), data.getEmail(), data.getCorp(), "");
+        var certHash = DigestUtils.sha1Hex(cert.getCertificate(data.getName()).getEncoded());
+        if (mumbleClient.updateUser(data.getName(), data.getEmail(), certHash)) {
+            logger.info("update user with hash:{} seccessful", certHash);
+        }
         var stream = new ByteArrayOutputStream();
         cert.store(stream, "".toCharArray());
         var response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,

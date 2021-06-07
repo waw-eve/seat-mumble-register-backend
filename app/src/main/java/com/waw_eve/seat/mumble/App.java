@@ -17,6 +17,8 @@ import com.waw_eve.seat.mumble.utils.CertUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import Murmur.InvalidSecretException;
+
 public class App {
     private static final Logger logger = LoggerFactory.getLogger(App.class);
 
@@ -45,6 +47,11 @@ public class App {
             }
         }
         CertUtil.init(configuration);
+        try {
+            MumbleClient.getInstance().init(configuration);
+        } catch (InvalidSecretException e) {
+            logger.error("Failed to init mumble client.", e);
+        }
         var server = new HttpServer(80);
         try {
             server.start();

@@ -29,5 +29,10 @@ public class Configuration {
     /**
      * The listening address of the mumble instance to connect to
      */
-    private String mumbleIceAddr = "127.0.0.1:6502";
+    private String mumbleIceAddr = "tcp -h 127.0.0.1 -p 6502";
+
+    /**
+     * Write secret for mumble server
+     */
+    private String mumbleIceSecret = "changeme";
 }

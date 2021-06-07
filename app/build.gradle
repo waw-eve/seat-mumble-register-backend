@@ -49,6 +49,9 @@ dependencies {
     // https://mvnrepository.com/artifact/org.bouncycastle/bcpkix-jdk15on
     implementation group: 'org.bouncycastle', name: 'bcpkix-jdk15on', version: '1.68'
 
+    // https://mvnrepository.com/artifact/commons-codec/commons-codec
+    implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
+
 }
 
 jib {
