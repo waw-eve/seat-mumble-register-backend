@@ -13,6 +13,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.waw_eve.seat.mumble.http.*;
 import com.waw_eve.seat.mumble.utils.CertUtil;
+import com.waw_eve.seat.mumble.utils.CryptUtil;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ public class App {
             }
         }
         CertUtil.init(configuration);
+        CryptUtil.init(configuration);
         try {
             MumbleClient.getInstance().init(configuration);
         } catch (InvalidSecretException e) {

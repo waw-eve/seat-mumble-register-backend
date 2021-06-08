@@ -3,11 +3,14 @@ package com.waw_eve.seat.mumble.http;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 
+import javax.crypto.Cipher;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.waw_eve.seat.mumble.MumbleClient;
 import com.waw_eve.seat.mumble.model.Request;
 import com.waw_eve.seat.mumble.utils.CertUtil;
+import com.waw_eve.seat.mumble.utils.CryptUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.bouncycastle.util.encoders.Base64;
@@ -34,11 +37,11 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
     private AsciiString contentType = HttpHeaderValues.BASE64;
 
     private String decode(String incomingMessage) {
-        return new String(Base64.decode(incomingMessage));
+        return new String(Base64.decode(CryptUtil.docrypt(incomingMessage, Cipher.DECRYPT_MODE).getBytes()));
     }
 
     private byte[] encode(ByteArrayOutputStream stream) {
-        return Base64.encode(stream.toByteArray());
+        return CryptUtil.docrypt(Base64.toBase64String(stream.toByteArray()), Cipher.ENCRYPT_MODE).getBytes();
     }
 
     @Override

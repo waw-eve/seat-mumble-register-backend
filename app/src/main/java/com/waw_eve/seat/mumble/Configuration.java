@@ -5,29 +5,39 @@ import lombok.Data;
 @Data
 public class Configuration {
     /**
+     * CA file, must endwith .p12
+     */
+    private String caFilePath = "ca.p12";
+    /**
      * If ca file exist, use this to decrypt p12 file.
      * 
      * If ca file not exist, use this to encrypt p12 file
      */
     private String caPassword = "";
-
     /**
-     * CA file, must endwith .p12
+     * If ca file not exist, use this name as CA's subject.
      */
-    private String caFilePath = "ca.p12";
+    private String caSubject = "C=CN, O=Test, OU=Root CA, CN=Test Root CA";
 
     /**
      * Encrypt key use to encrypt http request data with Blowfish
      */
     private String encryptKey = "changeme";
-
     /**
-     * If ca file not exist, use this name as CA's CN
+     * Initial vector, only available when using supported algorithms
      */
-    private String caSubject = "C=CN, O=Test, OU=Root CA, CN=Test Root CA";
+    private String encryptIV = "0123456789ABCDEF";
+    /**
+     * Encryption key algorithm
+     */
+    private String encryptKeyAlgorithm = "Blowfish";
+    /**
+     * Encryption cipher algorithm
+     */
+    private String encryptCipherAlgorithm = "Blowfish";
 
     /**
-     * The listening address of the mumble instance to connect to
+     * Mumble server's ice configuration
      */
     private String mumbleIceAddr = "tcp -h 127.0.0.1 -p 6502";
 
