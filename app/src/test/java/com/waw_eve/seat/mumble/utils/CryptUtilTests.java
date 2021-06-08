@@ -12,7 +12,7 @@ import org.junit.Test;
 public class CryptUtilTests {
 
     @Test
-    public void aesUtilTest() {
+    public void cryptUtilTest() {
         String src = Base64
                 .toBase64String("{\"name\":\"test\",\"email\":\"test@test.com\",\"corp\":\"higgs\"}".getBytes());
         Configuration configuration = new Configuration();
