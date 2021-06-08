@@ -17,9 +17,9 @@ public class Configuration {
     private String caFilePath = "ca.p12";
 
     /**
-     * AES encrypt key use to encrypt http request data
+     * Encrypt key use to encrypt http request data with Blowfish
      */
-    private String aesEncryptKey = "changeme";
+    private String encryptKey = "changeme";
 
     /**
      * If ca file not exist, use this name as CA's CN

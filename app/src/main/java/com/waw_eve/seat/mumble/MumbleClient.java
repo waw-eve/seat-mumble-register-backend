@@ -46,7 +46,7 @@ public class MumbleClient {
     }
 
     public boolean updateUser(String userName, String userEmail, String certHash) {
-        boolean successForAll = true;
+        var successForAll = true;
         for (ServerPrx serverPrx : servers) {
             if (!updateUser(userName, userEmail, certHash, serverPrx)) {
                 successForAll = false;

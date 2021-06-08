@@ -33,10 +33,18 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
 
     private AsciiString contentType = HttpHeaderValues.BASE64;
 
+    private String decode(String incomingMessage) {
+        return new String(Base64.decode(incomingMessage));
+    }
+
+    private byte[] encode(ByteArrayOutputStream stream) {
+        return Base64.encode(stream.toByteArray());
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         var req = msg.content().toString(Charset.defaultCharset());
-        var data = gson.fromJson(new String(Base64.decode(req)), Request.class);
+        var data = gson.fromJson(decode(req), Request.class);
         logger.info("received message:{}", data);
         var cert = CertUtil.signCert(data.getName(), data.getEmail(), data.getCorp(), "");
         var certHash = DigestUtils.sha1Hex(cert.getCertificate(data.getName()).getEncoded());
@@ -46,7 +54,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         var stream = new ByteArrayOutputStream();
         cert.store(stream, "".toCharArray());
         var response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK,
-                Unpooled.wrappedBuffer(Base64.encode(stream.toByteArray()))); // 2
+                Unpooled.wrappedBuffer(encode(stream))); // 2
 
         HttpHeaders heads = response.headers();
         heads.add(HttpHeaderNames.CONTENT_TYPE, contentType + "; charset=UTF-8");
