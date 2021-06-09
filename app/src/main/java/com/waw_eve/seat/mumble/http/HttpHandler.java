@@ -2,17 +2,20 @@ package com.waw_eve.seat.mumble.http;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
+import java.util.HashMap;
 
 import javax.crypto.Cipher;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.waw_eve.seat.mumble.Config;
 import com.waw_eve.seat.mumble.MumbleClient;
 import com.waw_eve.seat.mumble.model.Request;
 import com.waw_eve.seat.mumble.utils.CertUtil;
 import com.waw_eve.seat.mumble.utils.CryptUtil;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.apache.commons.text.StringSubstitutor;
 import org.bouncycastle.util.encoders.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +47,14 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         return CryptUtil.docrypt(Base64.toBase64String(stream.toByteArray()), Cipher.ENCRYPT_MODE).getBytes();
     }
 
+    private String generateMumbleUserName(Request request) {
+        var valuesMap = new HashMap<String, String>();
+        valuesMap.put("user", request.getName());
+        valuesMap.put("corp", request.getCorp());
+        var strsub = new StringSubstitutor(valuesMap);
+        return strsub.replace(Config.getGlobalConfig().getMumbleUserNampTemplate());
+    }
+
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, FullHttpRequest msg) throws Exception {
         var req = msg.content().toString(Charset.defaultCharset());
@@ -51,7 +62,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         logger.info("received message:{}", data);
         var cert = CertUtil.signCert(data.getName(), data.getEmail(), data.getCorp(), "");
         var certHash = DigestUtils.sha1Hex(cert.getCertificate(data.getName()).getEncoded());
-        if (mumbleClient.updateUser(data.getName(), data.getEmail(), certHash)) {
+        if (mumbleClient.updateUser(generateMumbleUserName(data), data.getEmail(), certHash)) {
             logger.info("update user with hash:{} seccessful", certHash);
         }
         var stream = new ByteArrayOutputStream();

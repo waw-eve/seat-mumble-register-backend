@@ -13,7 +13,7 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.waw_eve.seat.mumble.Configuration;
+import com.waw_eve.seat.mumble.Config;
 
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Base64;
@@ -36,7 +36,8 @@ public class CryptUtil {
         Security.addProvider(new BouncyCastleProvider());
     }
 
-    public static void init(Configuration configuration) {
+    public static void init() {
+        var configuration = Config.getGlobalConfig();
         keySpec = new SecretKeySpec(configuration.getEncryptKey().getBytes(StandardCharsets.UTF_8),
                 configuration.getEncryptKey());
         cipherAlgorithm = configuration.getEncryptCipherAlgorithm();

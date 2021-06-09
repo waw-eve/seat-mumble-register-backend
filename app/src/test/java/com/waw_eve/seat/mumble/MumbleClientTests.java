@@ -3,6 +3,8 @@ package com.waw_eve.seat.mumble;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import com.waw_eve.seat.mumble.model.Configuration;
+
 import org.junit.Test;
 
 import Murmur.InvalidSecretException;
@@ -13,8 +15,9 @@ public class MumbleClientTests {
     public void mumbleClientTest() {
         var mumbleClient = MumbleClient.getInstance();
         Configuration configuration = new Configuration();
+        Config.init(configuration);
         try {
-            mumbleClient.init(configuration);
+            mumbleClient.init();
         } catch (InvalidSecretException e) {
             e.printStackTrace();
         }

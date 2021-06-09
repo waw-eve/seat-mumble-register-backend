@@ -2,13 +2,16 @@ package com.waw_eve.seat.mumble;
 
 import static org.junit.Assert.assertNotNull;
 
+import com.waw_eve.seat.mumble.model.Configuration;
+
 import org.junit.Test;
 
-public class ConfigurationTests {
+public class ConfigTests {
 
     @Test
     public void configurationTest() {
         var configuration = new Configuration();
-        assertNotNull(configuration);
+        Config.init(configuration);
+        assertNotNull(Config.getGlobalConfig());
     }
 }

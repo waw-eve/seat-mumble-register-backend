@@ -25,7 +25,8 @@ public class MumbleClient {
     private MumbleClient() {
     }
 
-    public void init(Configuration configuration) throws InvalidSecretException {
+    public void init() throws InvalidSecretException {
+        var configuration = Config.getGlobalConfig();
         var properties = Util.createProperties();
         properties.setProperty("Ice.Default.EncodingVersion", "1.0");
         properties.setProperty("Ice.ImplicitContext", "Shared");

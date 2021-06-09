@@ -12,6 +12,7 @@ import java.io.IOException;
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
 import com.waw_eve.seat.mumble.http.*;
+import com.waw_eve.seat.mumble.model.Configuration;
 import com.waw_eve.seat.mumble.utils.CertUtil;
 import com.waw_eve.seat.mumble.utils.CryptUtil;
 
@@ -47,10 +48,11 @@ public class App {
                 logger.error("Failed to save config.", e);
             }
         }
-        CertUtil.init(configuration);
-        CryptUtil.init(configuration);
+        Config.init(configuration);
+        CertUtil.init();
+        CryptUtil.init();
         try {
-            MumbleClient.getInstance().init(configuration);
+            MumbleClient.getInstance().init();
         } catch (InvalidSecretException e) {
             logger.error("Failed to init mumble client.", e);
         }

@@ -20,7 +20,7 @@ import java.security.cert.X509Certificate;
 import java.util.Calendar;
 import java.util.Date;
 
-import com.waw_eve.seat.mumble.Configuration;
+import com.waw_eve.seat.mumble.Config;
 
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.DERSequence;
@@ -66,7 +66,8 @@ public class CertUtil {
     private CertUtil() {
     }
 
-    public static void init(Configuration configuration) {
+    public static void init() {
+        var configuration = Config.getGlobalConfig();
         caPassword = configuration.getCaPassword();
         KeyStore caKeyStore;
         String caFilePath = configuration.getCaFilePath();

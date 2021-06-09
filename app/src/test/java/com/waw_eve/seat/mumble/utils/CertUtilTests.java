@@ -7,7 +7,9 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.Certificate;
-import com.waw_eve.seat.mumble.Configuration;
+
+import com.waw_eve.seat.mumble.Config;
+import com.waw_eve.seat.mumble.model.Configuration;
 
 import org.junit.Test;
 
@@ -18,8 +20,9 @@ public class CertUtilTests {
         Configuration configuration = new Configuration();
         configuration.setCaFilePath("/tmp/" + String.valueOf(System.currentTimeMillis()) + ".p12");
         configuration.setCaPassword("");
-        CertUtil.init(configuration);
-        CertUtil.init(configuration);
+        Config.init(configuration);
+        CertUtil.init();
+        CertUtil.init();
         String cn = "Higgs-Ielenia Amastica";
         KeyStore ks = CertUtil.signCert(cn, "ieleniaamastica@waw-eve.com", "War and Wormhole", "");
         assertNotNull(ks);

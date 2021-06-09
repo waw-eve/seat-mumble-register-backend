@@ -1,4 +1,4 @@
-package com.waw_eve.seat.mumble;
+package com.waw_eve.seat.mumble.model;
 
 import lombok.Data;
 
@@ -45,4 +45,10 @@ public class Configuration {
      * Write secret for mumble server
      */
     private String mumbleIceSecret = "changeme";
+
+    /**
+     * Template string, used to generate mumble username based on the incoming
+     * information
+     */
+    private String mumbleUserNampTemplate = "${corp}-${user}";
 }
