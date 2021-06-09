@@ -26,6 +26,7 @@ public class MumbleClient {
     }
 
     public void init() throws InvalidSecretException {
+        logger.info("Initializing mumble client...");
         var configuration = Config.getGlobalConfig();
         var properties = Util.createProperties();
         properties.setProperty("Ice.Default.EncodingVersion", "1.0");
@@ -37,6 +38,7 @@ public class MumbleClient {
         var proxy = communicator.stringToProxy("Meta:" + configuration.getMumbleIceAddr());
         var meta = MetaPrx.checkedCast(proxy);
         servers = meta.getAllServers();
+        logger.info("The mumble client is initialized.");
     }
 
     public static MumbleClient getInstance() {

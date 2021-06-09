@@ -73,7 +73,7 @@ public class CertUtil {
         String caFilePath = configuration.getCaFilePath();
         var caDN = new X500Name(configuration.getCaSubject());
         var caFile = new File(caFilePath);
-        logger.info("Initializing certificate tool");
+        logger.info("Initializing certificate tool...");
         try {
             if (!caFile.exists()) {
                 caKeyStore = createCA(caDN);
@@ -101,7 +101,7 @@ public class CertUtil {
         } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | IOException e) {
             logger.error("Error in init CA", e);
         }
-        logger.info("The certificate tool is initialized");
+        logger.info("The certificate tool is initialized.");
     }
 
     public static KeyStore signCert(String name, String email, String org, String password) {

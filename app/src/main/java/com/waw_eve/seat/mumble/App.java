@@ -33,6 +33,7 @@ public class App {
             try {
                 var reader = new JsonReader(new FileReader(configFile));
                 configuration = gson.fromJson(reader, Configuration.class);
+                logger.info("Load config file success.");
             } catch (FileNotFoundException e) {
                 logger.error("Failed to read config file.", e);
             }
@@ -59,6 +60,7 @@ public class App {
         var server = new HttpServer(80);
         try {
             server.start();
+            logger.info("Server started.");
         } catch (InterruptedException e) {
             logger.error("Failed to start server.", e);
             Thread.currentThread().interrupt();

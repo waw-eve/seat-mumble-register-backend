@@ -38,10 +38,12 @@ public class CryptUtil {
 
     public static void init() {
         var configuration = Config.getGlobalConfig();
+        logger.info("Initializing crypt tool...");
         keySpec = new SecretKeySpec(configuration.getEncryptKey().getBytes(StandardCharsets.UTF_8),
                 configuration.getEncryptKey());
         cipherAlgorithm = configuration.getEncryptCipherAlgorithm();
         iv = configuration.getEncryptIV();
+        logger.info("The crypt tool is initialized.");
     }
 
     /**
