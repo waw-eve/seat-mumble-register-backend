@@ -1,4 +1,7 @@
 # seat-mumble-register-backend
+[![CI to Docker Hub](https://github.com/waw-eve/seat-mumble-register-backend/actions/workflows/main.yml/badge.svg)](https://github.com/waw-eve/seat-mumble-register-backend/actions/workflows/main.yml)
+[![Docker image size](https://img.shields.io/docker/image-size/alliancewaw/seat-mumble-register)](https://hub.docker.com/r/alliancewaw/seat-mumble-register)
+
 SeAT's mumble registration plugin backend
 
 # Introduction
