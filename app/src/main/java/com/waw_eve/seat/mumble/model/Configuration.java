@@ -20,7 +20,7 @@ public class Configuration {
     private String caSubject = "C=CN, O=Test, OU=Root CA, CN=Test Root CA";
 
     /**
-     * Encrypt key use to encrypt http request data with Blowfish
+     * Encrypt key use to encrypt http request data
      */
     private String encryptKey = "changeme";
     /**
