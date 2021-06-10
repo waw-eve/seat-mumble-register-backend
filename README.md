@@ -45,7 +45,6 @@ This is sample config
   "encryptKeyAlgorithm": "Blowfish",
   "encryptCipherAlgorithm": "Blowfish",
   "mumbleIceAddr": "tcp -h 127.0.01 -p 6502",
-  "mumbleIceSecret": "changeme",
-  "mumbleUserNampTemplate": "${corp}-${user}"
+  "mumbleIceSecret": "changeme"
 }
 ```
