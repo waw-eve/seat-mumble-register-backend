@@ -20,7 +20,7 @@ Return the base64 encoding of the certificate pfx file encrypted in the same way
 Automated builds of the image are available on [Dockerhub](https://hub.docker.com/r/alliancewaw/seat-mumble-register) and is the recommended method of installation.
 
 ```bash
-docker pull docker pull alliancewaw/seat-mumble-register
+docker pull alliancewaw/seat-mumble-register
 ```
 
 ### Quickstart
