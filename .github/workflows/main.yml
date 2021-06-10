@@ -25,4 +25,4 @@ jobs:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
       - name: Build with Gradle Jib Plugin
-        run: ./gradlew jib -Djib.to.tags=[${RELEASE_VERSION}]
+        run: ./gradlew jib -Djib.to.tags=["${RELEASE_VERSION}"]
