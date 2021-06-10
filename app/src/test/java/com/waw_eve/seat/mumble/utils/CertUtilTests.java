@@ -14,10 +14,9 @@ public class CertUtilTests {
 
     @Test
     public void certUtilTest() throws UnrecoverableKeyException, KeyStoreException, NoSuchAlgorithmException {
-        String cn = "Higgs-Ielenia Amastica";
-        KeyStore ks = CertUtil.signCert(cn, "ieleniaamastica@waw-eve.com", "");
+        KeyStore ks = CertUtil.signCert("Higgs-Ielenia Amastica", "ieleniaamastica@waw-eve.com", "");
         assertNotNull(ks);
-        Certificate certificate = ks.getCertificate(cn);
+        Certificate certificate = ks.getCertificate("Mumble Identity");
         assertNotNull(certificate);
     }
 
