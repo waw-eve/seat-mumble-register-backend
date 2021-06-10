@@ -23,18 +23,6 @@ public class Configuration {
      * Encrypt key use to encrypt http request data
      */
     private String encryptKey = "changeme";
-    /**
-     * Initial vector, only available when using supported algorithms
-     */
-    private String encryptIV = "0123456789ABCDEF";
-    /**
-     * Encryption key algorithm
-     */
-    private String encryptKeyAlgorithm = "Blowfish";
-    /**
-     * Encryption cipher algorithm
-     */
-    private String encryptCipherAlgorithm = "Blowfish";
 
     /**
      * Mumble server's ice configuration

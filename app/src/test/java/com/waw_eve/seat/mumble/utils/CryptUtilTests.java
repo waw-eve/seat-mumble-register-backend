@@ -14,17 +14,15 @@ public class CryptUtilTests {
 
     @Test
     public void cryptUtilTest() {
-        String src = Base64
-                .toBase64String("{\"name\":\"test\",\"email\":\"test@test.com\",\"corp\":\"higgs\"}".getBytes());
+        String src = Base64.toBase64String(
+                "{\"name\":\"Ielenia Amastacia\",\"email\":\"ieleniaamastacia@waw-eve.com\"}".getBytes());
         Configuration configuration = new Configuration();
         configuration.setEncryptKey("changeme");
-        configuration.setEncryptIV("0123456789ABCDEF");
-        configuration.setEncryptKeyAlgorithm("Blowfish");
-        configuration.setEncryptCipherAlgorithm("Blowfish");
         Config.init(configuration);
         CryptUtil.init();
         String encrypted = CryptUtil.docrypt(src, Cipher.ENCRYPT_MODE);
-        assertEquals("vNDY5B9qmXJLqK57vYQ+PF5eZWzQPMoO2RBt40oLZE29r7Pd40NOodcQjZ7vGZvgUMOuf79BfB0=", encrypted);
+        assertEquals("vNDY5B9qmXL/YkfcqdUovbeztOpyQaXzY7+asQ2Uk3FcPQv2fadYsTAmeXYeJaeu6O5/97Wu5EYrIfLI8dm0/3tJ1eQDdvqG",
+                encrypted);
         String decrypted = CryptUtil.docrypt(encrypted, Cipher.DECRYPT_MODE);
         assertEquals(src, decrypted);
     }

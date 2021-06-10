@@ -1,7 +1,6 @@
 package com.waw_eve.seat.mumble.utils;
 
 import java.nio.charset.StandardCharsets;
-import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Security;
@@ -10,7 +9,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.waw_eve.seat.mumble.Config;
@@ -22,9 +20,6 @@ import org.slf4j.LoggerFactory;
 
 public class CryptUtil {
     private static final Logger logger = LoggerFactory.getLogger(CryptUtil.class);
-
-    private static String cipherAlgorithm;
-    private static String iv;
 
     private static SecretKeySpec keySpec;
 
@@ -41,8 +36,6 @@ public class CryptUtil {
         logger.info("Initializing crypt tool...");
         keySpec = new SecretKeySpec(configuration.getEncryptKey().getBytes(StandardCharsets.UTF_8),
                 configuration.getEncryptKey());
-        cipherAlgorithm = configuration.getEncryptCipherAlgorithm();
-        iv = configuration.getEncryptIV();
         logger.info("The crypt tool is initialized.");
     }
 
@@ -55,17 +48,14 @@ public class CryptUtil {
      */
     public static String docrypt(String content, int mode) {
         try {
-            var cipher = Cipher.getInstance(cipherAlgorithm);
-            if (iv != null) {
-                cipher.init(mode, keySpec, new IvParameterSpec(iv.getBytes()));
-            } else {
-                cipher.init(mode, keySpec);
-            }
+            var cipher = Cipher.getInstance("Blowfish");
+            cipher.init(mode, keySpec);
+
             byte[] result = cipher.doFinal(Base64.decode(content));
 
             return Base64.toBase64String(result);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | IllegalBlockSizeException
-                | BadPaddingException | InvalidAlgorithmParameterException e) {
+                | BadPaddingException e) {
             logger.error("Crypt message failed", e);
         }
 
