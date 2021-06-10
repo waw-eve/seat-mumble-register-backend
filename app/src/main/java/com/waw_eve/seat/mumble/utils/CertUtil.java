@@ -47,7 +47,7 @@ public class CertUtil {
 
     private static KeyPairGenerator keyPairGen;
 
-    private static Certificate caCertificate;
+    private static X509Certificate caCertificate;
     private static PrivateKey caPrivateKey;
 
     private static String caPassword;
@@ -96,7 +96,7 @@ public class CertUtil {
                 logger.error("The certificate tool has not been initialized");
                 return;
             } else {
-                caCertificate = caKeyStore.getCertificate(CA_FRIENDLY_NAME);
+                caCertificate = (X509Certificate) caKeyStore.getCertificate(CA_FRIENDLY_NAME);
             }
         } catch (NoSuchAlgorithmException | KeyStoreException | UnrecoverableKeyException | IOException e) {
             logger.error("Error in init CA", e);
@@ -112,6 +112,7 @@ public class CertUtil {
         var dnStr = new StringBuilder();
         dnStr.append("CN=").append(name).append(", E=").append(email);
         var dnName = new X500Name(dnStr.toString());
+        var issuer = new X500Name(caCertificate.getSubjectDN().getName());
         var subjectAltNames = GeneralNames
                 .getInstance(new DERSequence(new GeneralName[] { new GeneralName(GeneralName.rfc822Name, email) }));
         var keyPair = keyPairGen.genKeyPair();
@@ -131,7 +132,7 @@ public class CertUtil {
 
             var contentSigner = new JcaContentSignerBuilder(SIGNATURE_ALGORITHM).build(caPrivateKey);
 
-            var certBuilder = new JcaX509v3CertificateBuilder(dnName, certSerialNumber, startDate, endDate, dnName,
+            var certBuilder = new JcaX509v3CertificateBuilder(issuer, certSerialNumber, startDate, endDate, dnName,
                     keyPair.getPublic()).addExtension(Extension.subjectAlternativeName, false, subjectAltNames);
             return packageCert(keyPair,
                     new JcaX509CertificateConverter().getCertificate(certBuilder.build(contentSigner)), name, password);
