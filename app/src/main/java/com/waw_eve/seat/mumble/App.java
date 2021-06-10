@@ -11,9 +11,8 @@ import java.io.IOException;
 
 import com.google.gson.GsonBuilder;
 import com.google.gson.stream.JsonReader;
-import com.waw_eve.seat.mumble.http.*;
+import com.waw_eve.seat.mumble.http.HttpServer;
 import com.waw_eve.seat.mumble.model.Configuration;
-import com.waw_eve.seat.mumble.utils.CertUtil;
 import com.waw_eve.seat.mumble.utils.CryptUtil;
 
 import org.slf4j.Logger;
@@ -50,7 +49,6 @@ public class App {
             }
         }
         Config.init(configuration);
-        CertUtil.init();
         CryptUtil.init();
         try {
             MumbleClient.getInstance().init();

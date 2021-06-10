@@ -29,7 +29,7 @@ you can use the sample [docker-compose.yml](docker-compose.yml) file to start th
 
 ### Configuration
 
-After first run, it will auto create ca.p12 and config.json file in data folder.
+After first run, it will auto create config.json file in data folder.
 
 Edit the config.json to change settings.
 
@@ -37,13 +37,7 @@ This is sample config
 
 ```json
 {
-  "caFilePath": "ca.p12",
-  "caPassword": "",
-  "caSubject": "C=CN, O=Test, OU=Root CA, CN=Test Root CA",
   "encryptKey": "changeme",
-  "encryptIV": "0123456789ABCDEF",
-  "encryptKeyAlgorithm": "Blowfish",
-  "encryptCipherAlgorithm": "Blowfish",
   "mumbleIceAddr": "tcp -h 127.0.01 -p 6502",
   "mumbleIceSecret": "changeme"
 }

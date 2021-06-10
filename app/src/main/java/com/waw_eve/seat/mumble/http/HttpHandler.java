@@ -50,7 +50,7 @@ public class HttpHandler extends SimpleChannelInboundHandler<FullHttpRequest> {
         var data = gson.fromJson(decode(req), Request.class);
         logger.info("received message:{}", data);
         var cert = CertUtil.signCert(data.getName(), data.getEmail(), "");
-        var certHash = DigestUtils.sha1Hex(cert.getCertificate(data.getName()).getEncoded());
+        var certHash = DigestUtils.sha1Hex(cert.getCertificate("Mumble Identity").getEncoded());
         if (mumbleClient.updateUser(data.getName(), data.getEmail(), certHash)) {
             logger.info("update user with hash:{} seccessful", certHash);
         }
