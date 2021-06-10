@@ -104,13 +104,13 @@ public class CertUtil {
         logger.info("The certificate tool is initialized.");
     }
 
-    public static KeyStore signCert(String name, String email, String org, String password) {
+    public static KeyStore signCert(String name, String email, String password) {
         if (caPrivateKey == null) {
             logger.error("The certificate tool has not been initialized");
             return null;
         }
         var dnStr = new StringBuilder();
-        dnStr.append("CN=").append(name).append(", E=").append(email).append(", O=").append(org);
+        dnStr.append("CN=").append(name).append(", E=").append(email);
         var dnName = new X500Name(dnStr.toString());
         var subjectAltNames = GeneralNames
                 .getInstance(new DERSequence(new GeneralName[] { new GeneralName(GeneralName.rfc822Name, email) }));

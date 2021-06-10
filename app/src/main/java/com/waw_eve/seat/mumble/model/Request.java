@@ -10,11 +10,6 @@ public class Request {
     private String name;
 
     /**
-     * This user belong to which corp
-     */
-    private String corp;
-
-    /**
      * User's email address
      */
     private String email;

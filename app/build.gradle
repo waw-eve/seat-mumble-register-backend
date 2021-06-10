@@ -51,8 +51,6 @@ dependencies {
 
     // https://mvnrepository.com/artifact/commons-codec/commons-codec
     implementation group: 'commons-codec', name: 'commons-codec', version: '1.15'
-    // https://mvnrepository.com/artifact/org.apache.commons/commons-text
-    implementation group: 'org.apache.commons', name: 'commons-text', version: '1.9'
 
 }
 

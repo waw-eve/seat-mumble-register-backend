@@ -24,7 +24,7 @@ public class CertUtilTests {
         CertUtil.init();
         CertUtil.init();
         String cn = "Higgs-Ielenia Amastica";
-        KeyStore ks = CertUtil.signCert(cn, "ieleniaamastica@waw-eve.com", "War and Wormhole", "");
+        KeyStore ks = CertUtil.signCert(cn, "ieleniaamastica@waw-eve.com", "");
         assertNotNull(ks);
         Certificate certificate = ks.getCertificate(cn);
         assertNotNull(certificate);

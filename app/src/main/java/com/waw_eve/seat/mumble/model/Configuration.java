@@ -46,9 +46,4 @@ public class Configuration {
      */
     private String mumbleIceSecret = "changeme";
 
-    /**
-     * Template string, used to generate mumble username based on the incoming
-     * information
-     */
-    private String mumbleUserNampTemplate = "${corp}-${user}";
 }
