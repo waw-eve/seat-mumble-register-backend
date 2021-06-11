@@ -13,7 +13,7 @@ plugins {
     id 'jacoco'
     // This plugin is not yet compatible with Gradle7
 //    id 'com.zeroc.gradle.ice-builder.slice' version '1.4.7'
-    id 'com.google.cloud.tools.jib' version '3.1.0'
+    id 'com.google.cloud.tools.jib' version '3.1.1'
     id "io.freefair.lombok" version "6.0.0-m2"
 }
 
