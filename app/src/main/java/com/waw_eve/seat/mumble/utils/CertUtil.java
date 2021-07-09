@@ -47,7 +47,7 @@ public class CertUtil {
         try {
             keyPairGen = KeyPairGenerator.getInstance("RSA");
         } catch (NoSuchAlgorithmException e) {
-            logger.error("Unsupport RSA", e);
+            logger.error("Unsupported RSA", e);
         }
         keyPairGen.initialize(4096, new SecureRandom());
     }
