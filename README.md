@@ -38,7 +38,7 @@ This is sample config
 ```json
 {
   "encryptKey": "changeme",
-  "mumbleIceAddr": "tcp -h 127.0.01 -p 6502",
+  "mumbleIceAddr": "tcp -h 127.0.0.1 -p 6502",
   "mumbleIceSecret": "changeme"
 }
 ```
